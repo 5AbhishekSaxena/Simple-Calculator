@@ -1,5 +1,6 @@
 package `in`.abhisheksaxena.simple_calculator
 
+import `in`.abhisheksaxena.layouttutorial.HideErrorLine
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -11,27 +12,29 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         setupSpinner()
 
-        calculateButton.setOnClickListener{
-            val firstNumberString = numberOneEditText.text.toString()
-            val secondNumberString = numberTwoEditText.text.toString()
+        firstNumberEditText.addTextChangedListener(HideErrorLine(firstNumberLayout))
+        secondNumberEditText.addTextChangedListener(HideErrorLine(secondNumberLayout))
+
+        calculateButton.setOnClickListener {
+            val firstNumberString = firstNumberEditText.text.toString()
+            val secondNumberString = secondNumberEditText.text.toString()
 
             if (firstNumberString.isEmpty()) {
-                Toast.makeText(this, "Enter first number.", Toast.LENGTH_SHORT).show()
+                firstNumberLayout.error = "First Number field is empty."
                 return@setOnClickListener
             }
 
             if (secondNumberString.isEmpty()) {
-                Toast.makeText(this, "Enter second number.", Toast.LENGTH_SHORT).show()
+                secondNumberLayout.error = "Second Number field is empty."
                 return@setOnClickListener
             }
 
-            val firstNumber = firstNumberString.toDouble()
-            val secondNumber = secondNumberString.toDouble()
+            val firstNumber = firstNumberEditText.text.toString().toDouble()
+            val secondNumber = secondNumberEditText.text.toString().toDouble()
 
-            val operation = operatorSpinner.selectedItem.toString()
+            val operation = operatorsSpinner.text.toString()
 
             val result: Double? = when (operation) {
                 ADD -> firstNumber + secondNumber
@@ -40,20 +43,20 @@ class MainActivity : AppCompatActivity() {
                 DIVIDE -> firstNumber / secondNumber
                 else -> null
             }
-
-            resultTextView.text = if(result != null) ("Result: $result") else ("Invalid Operation")
+            resultTextView.text =
+                if (result != null) ("Result: $result") else ("Invalid Operation!")
         }
-
     }
 
-    private fun setupSpinner(){
+    private fun setupSpinner() {
         val operators = listOf(ADD, SUBTRACT, MULTIPLY, DIVIDE)
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, operators)
-        operatorSpinner.adapter = adapter
+        ArrayAdapter(this, R.layout.drop_down_menu_item, operators).also { adapter ->
+            operatorsSpinner.setAdapter(adapter)
+            operatorsSpinner.setText(operators[0], false)
+        }
     }
 
-    companion object{
+    companion object {
         const val ADD = "Add"
         const val SUBTRACT = "Subtract"
         const val MULTIPLY = "Multiply"
